@@ -40,64 +40,187 @@ Online furniture e-commerce suffers from elevated return rates and customer hesi
 
 ## 🏗️ System Architecture
 
-Mirage operates across four specialized modules coordinated over RESTful APIs and cross-platform native bridges:
+Mirage implements a decoupled, three-tier microservice architecture engineered to reconcile heavy computer vision inference and real-time 3D spatial computing with consumer mobile hardware:
+
+1. **Presentation & Spatial Client**: Flutter 3.8+ cross-platform mobile app embedding a native Unity 6000 XR runtime via `flutter_embed_unity`.
+2. **Commerce Core & Orchestration API**: Laravel 12 RESTful API with Filament 4 admin panel, Sanctum authentication, and MySQL relational persistence.
+3. **Multimodal Machine Learning Microservice**: Python FastAPI ASGI server running OpenAI CLIP visual transformers, K-Means chromatic clustering, and FAISS vector indexing.
 
 ```mermaid
-graph TD
-    subgraph Client["📱 Mobile Client (Flutter & Embedded Unity)"]
-        UI["Flutter UI<br>(Provider & GoRouter)"]
-        Camera["Camera Module<br>(Room Capture)"]
-        UnityAR["Embedded Unity XR<br>(AR Foundation Engine)"]
+flowchart TB
+    %% ─────────────────────────────────────────────────────────────
+    %% STYLING DEFINITIONS
+    %% ─────────────────────────────────────────────────────────────
+    classDef clientStyle fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc;
+    classDef unityStyle fill:#18181b,stroke:#a855f7,stroke-width:2px,color:#f8fafc;
+    classDef backendStyle fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc;
+    classDef aiStyle fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc;
+    classDef storageStyle fill:#451a03,stroke:#fbbf24,stroke-width:2px,color:#f8fafc;
+
+    %% ─────────────────────────────────────────────────────────────
+    %% TIER 1: CLIENT
+    %% ─────────────────────────────────────────────────────────────
+    subgraph TIER1["📱 TIER 1: HYBRID MOBILE CLIENT (Android / iOS)"]
+        subgraph FLUTTER["Flutter 3.8 Application Layer"]
+            UI["Modern UI / UX<br>(Provider & GoRouter)"]:::clientStyle
+            CameraModule["Camera Controller<br>(1080p Snapshot Capture)"]:::clientStyle
+            DioClient["Network Client<br>(Dio / HTTPS)"]:::clientStyle
+        end
+
+        subgraph BRIDGE["Native Platform Bridge"]
+            JNI["flutter_embed_unity<br>(JNI / MethodChannel)"]:::unityStyle
+        end
+
+        subgraph UNITY["Embedded Unity 6000 XR Viewport"]
+            GLBManager["GLBManager.cs<br>(Runtime Bridge Singleton)"]:::unityStyle
+            ARLoader["ARGLBLoader.cs<br>(glTFast Runtime Spawner)"]:::unityStyle
+            ARFoundation["AR Foundation Subsystems<br>(ARPlane & ARRaycast Managers)"]:::unityStyle
+            ARCoreKit["Hardware AR HAL<br>(ARCore / ARKit)"]:::unityStyle
+        end
     end
 
-    subgraph BackendAPI["⚡ Commerce Core (Laravel 12 API)"]
-        L_Auth["Sanctum Auth"]
-        L_Catalog["Catalog & Inventory"]
-        L_Filament["Filament 4 Admin Panel"]
-        DB[("MySQL Database")]
-        Storage["Asset Storage<br>(GLB 3D Models & Images)"]
+    %% ─────────────────────────────────────────────────────────────
+    %% TIER 2: COMMERCE BACKEND
+    %% ─────────────────────────────────────────────────────────────
+    subgraph TIER2["⚡ TIER 2: COMMERCE CORE & ORCHESTRATION (Laravel 12 - Port 8000)"]
+        Gateway["HTTP Routing & Gateway<br>(Sanctum Auth Middleware)"]:::backendStyle
+        Controllers["Resource Controllers<br>(Product, Category, Order APIs)"]:::backendStyle
+        Filament["Filament 4 Admin Dashboard<br>(Catalog, SKUs, 3D Assets)"]:::backendStyle
+        Scribe["Scribe OpenAPI Engine<br>(Interactive Documentation)"]:::backendStyle
+        MySQL[("MySQL Relational DB<br>Products, Users, Orders")]:::backendStyle
     end
 
-    subgraph AIService["🧠 AI Stylist Microservice (Python FastAPI)"]
-        FastAPI["FastAPI Inference Server"]
-        CLIP["OpenAI CLIP Model<br>(Multimodal Embeddings)"]
-        KMeans["K-Means Clustering<br>(Palette Extraction)"]
-        FAISS["FAISS Index<br>(Vector Similarity Search)"]
+    %% ─────────────────────────────────────────────────────────────
+    %% TIER 3: AI MICROSERVICE
+    %% ─────────────────────────────────────────────────────────────
+    subgraph TIER3["🧠 TIER 3: MULTIMODAL AI STYLIST (FastAPI - Port 8001)"]
+        FastAPI["FastAPI Uvicorn ASGI Server<br>(/analyze Endpoint)"]:::aiStyle
+        Preprocess["Image Preprocessing<br>(PIL, OpenCV Resize)"]:::aiStyle
+        KMeans["K-Means Clustering Engine<br>(5-Color Palette & Temperature)"]:::aiStyle
+        Lighting["Photometric Evaluator<br>(Luminance & RMS Contrast)"]:::aiStyle
+        CLIP["OpenAI CLIP ViT Encoder<br>(512D Normalized Embedding)"]:::aiStyle
+        FAISS["FAISS Vector Index<br>(Pre-indexed Catalog Embeddings)"]:::aiStyle
+        Ranking["Composite Scoring Engine<br>(S = 0.65·Style + 0.35·Color)"]:::aiStyle
     end
 
-    Camera -->|"Uploads Room Image"| FastAPI
-    FastAPI -->|"Evaluates Palette & Lighting"| KMeans
-    FastAPI -->|"Computes Semantic Similarity"| CLIP
-    CLIP -->|"Vector Nearest Neighbors"| FAISS
-    FastAPI -->|"Returns Scored Recommendations"| UI
+    %% ─────────────────────────────────────────────────────────────
+    %% ASSET STORAGE
+    %% ─────────────────────────────────────────────────────────────
+    subgraph CLOUD["☁️ ASSET STORAGE & CDN"]
+        AssetStorage["Public Storage / CDN<br>(Optimized .glb 3D Models & PBR Maps)"]:::storageStyle
+    end
 
-    UI -->|"Browse & Checkout"| BackendAPI
-    L_Catalog <--> DB
-    L_Filament <--> Storage
+    %% ─────────────────────────────────────────────────────────────
+    %% DATA INTERCONNECTIONS
+    %% ─────────────────────────────────────────────────────────────
+    CameraModule -->|"1. Multipart JPEG Upload"| FastAPI
+    FastAPI --> Preprocess
+    Preprocess --> KMeans
+    Preprocess --> Lighting
+    Preprocess --> CLIP
+    CLIP -->|"512D Query Vector"| FAISS
+    FAISS -->|"Candidate Matches"| Ranking
+    KMeans -->|"Palette Vector"| Ranking
+    Lighting -->|"Ambient Context"| Ranking
+    Ranking -->|"2. Ranked SKUs & Color Analytics JSON"| UI
 
-    UI -->|"Transfers GLB URL to Engine"| UnityAR
-    UnityAR -->|"Streams 3D Assets"| Storage
+    UI <-->|"3. Browse, Authenticate, Checkout (REST API)"| Gateway
+    Gateway <--> Controllers
+    Controllers <--> MySQL
+    Filament <--> MySQL
+    Filament -->|"Uploads 3D Models"| AssetStorage
+
+    UI -->|"4. Model URL & Placement Command"| JNI
+    JNI --> GLBManager
+    GLBManager --> ARLoader
+    ARLoader <--> ARFoundation
+    ARFoundation <--> ARCoreKit
+    ARLoader ==>|"5. Asynchronous .glb Binary Stream"| AssetStorage
 ```
 
-### AI Recommendation Pipeline
+### 🔄 End-to-End Operational Sequence
+
 ```mermaid
-flowchart LR
-    A["📸 Room Snapshot"] --> B["Color & Lighting Analysis<br>(K-Means & Luminance)"]
-    A --> C["Vision Encoding<br>(OpenAI CLIP ViT)"]
-    C --> D["Vector Nearest Neighbors<br>(FAISS Similarity Search)"]
-    B --> E["Aesthetic & Palette Harmonization"]
-    D --> E
-    E --> F["🎯 Ranked Furniture Recommendations"]
+sequenceDiagram
+    autonumber
+    actor Customer as 👤 Customer
+    participant Flutter as 📱 Flutter Client
+    participant Unity as 🥽 Embedded Unity XR
+    participant FastAPI as 🧠 FastAPI AI (:8001)
+    participant Laravel as ⚡ Laravel API (:8000)
+    participant Storage as ☁️ Cloud 3D Storage
+
+    %% Stage 1: Room Scan & AI Recommendation
+    Note over Customer, FastAPI: Stage 1: In-Situ Room Analysis & Aesthetic Recommendation
+    Customer->>Flutter: Takes room photograph via in-app camera
+    Flutter->>FastAPI: POST /analyze (Standardized 1080p Image)
+    FastAPI->>FastAPI: K-Means extracts 5 dominant colors & temperature
+    FastAPI->>FastAPI: CLIP ViT generates 512D aesthetic embedding
+    FastAPI->>FastAPI: FAISS cosine search matches catalog vectors
+    FastAPI-->>Flutter: 200 OK (Ranked SKUs, color harmony, lighting context)
+    Flutter-->>Customer: Renders interactive recommendations
+
+    %% Stage 2: Embedded AR Visualization
+    Note over Customer, Storage: Stage 2: True-to-Scale AR Spatial Projection
+    Customer->>Flutter: Selects item & taps "View in AR"
+    Flutter->>Unity: Passes GLB URL & dimensions via JNI (flutter_embed_unity)
+    Unity->>Unity: AR Foundation starts ARCore/ARKit session
+    Unity->>Unity: RANSAC plane estimation detects floor/wall surfaces
+    Unity->>Storage: Streams .glb asset asynchronously (glTFast)
+    Storage-->>Unity: 200 OK (Mesh geometry & PBR materials)
+    Unity->>Unity: Spawns 3D model anchored at 1:1 metric scale
+    Customer->>Unity: Manipulates model (Translate, Rotate, Scale)
+
+    %% Stage 3: Checkout & Order Fulfillment
+    Note over Customer, Laravel: Stage 3: E-Commerce Transaction & Fulfillment
+    Customer->>Flutter: Adds furniture item to cart & initiates checkout
+    Flutter->>Laravel: POST /api/orders (Sanctum Bearer Token)
+    Laravel->>Laravel: Validates stock, stores transaction in MySQL
+    Laravel-->>Flutter: 201 Created (Order confirmation & invoice)
+    Flutter-->>Customer: Displays order receipt & delivery tracking
 ```
 
-### AR Surface Detection & Scale Pipeline
+### 🧠 Subsystem Deep-Dive: AI Recommendation Pipeline
+
 ```mermaid
 flowchart LR
-    A["📱 AR Camera Stream"] --> B["Surface Feature Point Tracking<br>(AR Foundation)"]
-    B --> C["Horizontal & Vertical Plane Estimation<br>(Floors & Walls)"]
-    C --> D["1:1 Metric Calibration Anchor"]
-    D --> E["Cloud GLB Streaming & Spawning<br>(glTFast / Async Loader)"]
-    E --> F["🥽 Real-Time Gesture Manipulation<br>(Rotate, Translate, Inspect)"]
+    A["📸 1080p Room Snapshot"] --> B["Downsample 256x256<br>& RGB Matrix Extraction"]
+    A --> C["Resize 224x224<br>& Normalize Tensor"]
+    
+    subgraph Chromatic["Color & Photometric Analysis"]
+        B --> D["K-Means Clustering k=5<br>Centroids & Pixel Proportions"]
+        D --> E["CIE Lab Color Distance<br>& Warm/Cool Temperature"]
+        B --> F["Luminance & RMS Contrast<br>Exposure Classification"]
+    end
+    
+    subgraph VisionAI["Deep Multimodal Semantics"]
+        C --> G["OpenAI CLIP ViT Vision Transformer"]
+        G --> H["512D Normalized Hypersphere Vector v_room"]
+    end
+    
+    subgraph Retrieval["Vector Indexing & Scoring"]
+        H --> I["FAISS Cosine Similarity Search<br>Against Furniture Catalog"]
+        E --> J["Chromatic Harmony Weighting"]
+        I --> K["Composite Scoring Engine<br>S = 0.65·Style + 0.35·Color"]
+        J --> K
+        F --> K
+    end
+    
+    K --> L["🎯 Scored & Filtered Furniture Recommendations"]
+```
+
+### 🥽 Subsystem Deep-Dive: Unity AR Spatial Calibration Pipeline
+
+```mermaid
+flowchart LR
+    A["📱 Monocular Camera<br>& IMU Sensors"] --> B["Feature Point Gradient Tracking<br>(ARCore / ARKit HAL)"]
+    B --> C["Coplanar Surface Estimation<br>(RANSAC Algorithm)"]
+    C --> D["Horizontal Floors & Vertical Walls Detection<br>(ARPlaneManager)"]
+    D --> E["Screen-Space Touch Raycast<br>(ARRaycastManager)"]
+    E --> F["Sub-Centimeter 3D World Anchor"]
+    F --> G["Asynchronous Cloud .glb Download<br>(glTFast Runtime Loader)"]
+    G --> H["PBR Shaders & Spherical Harmonics Lighting"]
+    H --> I["🛋️ True-to-Scale 1:1 Metric Placement<br>& Real-Time Gesture Manipulation"]
 ```
 
 ---
