@@ -1,10 +1,6 @@
 # 🛋️ Mirage: AI-Powered Augmented Reality Smart Furniture Store
 
 <p align="center">
-  <img src="docs/assets/figures/app_ui_overview.png" alt="Mirage App Overview" width="850">
-</p>
-
-<p align="center">
   <strong>An Intelligent Spatial Commerce Ecosystem Combining Unity XR, Flutter, Laravel 12, and Multimodal CLIP AI.</strong>
 </p>
 
@@ -24,25 +20,6 @@
 Online furniture e-commerce suffers from elevated return rates and customer hesitation caused by **spatial uncertainty** (will it physically fit?) and **aesthetic discord** (will it match the room's lighting, palette, and style?). 
 
 **Mirage** bridges this divide by delivering an end-to-end, commercial-grade spatial e-commerce ecosystem. The system pairs **true-to-scale 1:1 Augmented Reality visualization** with an **in-situ Multimodal AI interior stylist**. Customers can capture a snapshot of their living space, receive real-time aesthetic and color-harmonic furniture recommendations via OpenAI CLIP and K-Means clustering, and immediately project photorealistic 3D furniture into their physical environment using phone-based AR before purchasing.
-
----
-
-## 📸 Visual Showcase & AR Capabilities
-
-<div align="center">
-  <img src="docs/assets/figures/ar_placement_preview.png" alt="AR Furniture Placement" width="48%">
-  <img src="docs/assets/figures/ar_placement_interface.png" alt="AR Placement Interface" width="48%">
-</div>
-
-<p align="center">
-  <em>True-to-scale 3D furniture rendered on detected floor and wall planes with real-time gesture controls.</em>
-</p>
-
-<div align="center">
-  <img src="docs/assets/figures/product_details_screen.png" alt="Product Details Screen" width="31%">
-  <img src="docs/assets/screenshots/screenshot_01.jpeg" alt="Catalog Screen" width="31%">
-  <img src="docs/assets/screenshots/screenshot_06.jpeg" alt="Room Scan Screen" width="31%">
-</div>
 
 ---
 
@@ -102,20 +79,26 @@ graph TD
     UnityAR -->|"Streams 3D Assets"| Storage
 ```
 
-### Data Flow Diagram
-<p align="center">
-  <img src="docs/assets/figures/data_flow_diagram.png" alt="Mirage Data Flow Diagram" width="800">
-</p>
-
 ### AI Recommendation Pipeline
-<p align="center">
-  <img src="docs/assets/figures/ai_recommendation_pipeline.png" alt="AI Recommendation Pipeline" width="800">
-</p>
+```mermaid
+flowchart LR
+    A["📸 Room Snapshot"] --> B["Color & Lighting Analysis<br>(K-Means & Luminance)"]
+    A --> C["Vision Encoding<br>(OpenAI CLIP ViT)"]
+    C --> D["Vector Nearest Neighbors<br>(FAISS Similarity Search)"]
+    B --> E["Aesthetic & Palette Harmonization"]
+    D --> E
+    E --> F["🎯 Ranked Furniture Recommendations"]
+```
 
 ### AR Surface Detection & Scale Pipeline
-<p align="center">
-  <img src="docs/assets/figures/ar_plane_detection_pipeline.png" alt="AR Plane Detection Pipeline" width="800">
-</p>
+```mermaid
+flowchart LR
+    A["📱 AR Camera Stream"] --> B["Surface Feature Point Tracking<br>(AR Foundation)"]
+    B --> C["Horizontal & Vertical Plane Estimation<br>(Floors & Walls)"]
+    C --> D["1:1 Metric Calibration Anchor"]
+    D --> E["Cloud GLB Streaming & Spawning<br>(glTFast / Async Loader)"]
+    E --> F["🥽 Real-Time Gesture Manipulation<br>(Rotate, Translate, Inspect)"]
+```
 
 ---
 
@@ -125,11 +108,11 @@ Empirically validated and documented in the official graduation thesis:
 
 | Metric | Result | Target Benchmark | Status |
 | :--- | :--- | :--- | :---: |
-| **AR Rendering Frame Rate** | **34.8 – 36.2 FPS** | ≥ 30 FPS on mid-range devices |  Passed |
-| **Spatial Scale Accuracy** | **1:1 Metric Calibration** | Deviation < 3% of physical ground truth |  Passed |
-| **AI Inference Latency** | **1.74 seconds** (end-to-end) | ≤ 3.0 seconds per room analysis |  Passed |
-| **Plane Detection Speed** | **1.2 – 2.4 seconds** | Fast initial anchor acquisition |  Passed |
-| **3D GLB Download & Spawning** | **< 3.1 seconds** (avg 5MB model) | Asynchronous non-blocking runtime |  Passed |
+| **AR Rendering Frame Rate** | **34.8 – 36.2 FPS** | ≥ 30 FPS on mid-range devices | Passed |
+| **Spatial Scale Accuracy** | **1:1 Metric Calibration** | Deviation < 3% of physical ground truth | Passed |
+| **AI Inference Latency** | **1.74 seconds** (end-to-end) | ≤ 3.0 seconds per room analysis | Passed |
+| **Plane Detection Speed** | **1.2 – 2.4 seconds** | Fast initial anchor acquisition | Passed |
+| **3D GLB Download & Spawning** | **< 3.1 seconds** (avg 5MB model) | Asynchronous non-blocking runtime | Passed |
 
 ---
 
