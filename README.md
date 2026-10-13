@@ -143,8 +143,7 @@ Mirage-AR-Furniture-Store/
 │   ├── Assets/FlutterEmbed/  # Bridge scripts exporting Unity into Flutter
 │   └── ProjectSettings/      # ARCore / ARKit XR plugin management
 │
-├── docs/                     # Architectural diagrams, schematics, and thesis PDF
-│   ├── assets/               # Curated figures and app screenshots
+├── docs/                     # Academic documentation & thesis
 │   └── Mirage_Project_Documentation.pdf
 │
 └── README.md                 # Flagship project documentation
