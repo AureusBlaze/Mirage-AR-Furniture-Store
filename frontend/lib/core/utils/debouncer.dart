@@ -1,0 +1,24 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
+
+/// Debouncer utility for search input.
+class Debouncer {
+  final Duration delay;
+  Timer? _timer;
+
+  Debouncer({this.delay = const Duration(milliseconds: 300)});
+
+  void run(VoidCallback action) {
+    _timer?.cancel();
+    _timer = Timer(delay, action);
+  }
+
+  void cancel() {
+    _timer?.cancel();
+  }
+
+  void dispose() {
+    _timer?.cancel();
+    _timer = null;
+  }
+}

@@ -1,0 +1,108 @@
+# ==============================================================================
+# Mirage Monorepo Root .gitignore
+# Covers: Unity XR, Flutter/Dart, Laravel 12, Python FastAPI/AI, OS & IDEs
+# ==============================================================================
+
+# ── General & OS Files ──
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.tmp
+*.bak
+*.swp
+*~
+
+# ── IDEs & Editors ──
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.vs/
+
+# ── Unity XR Engine ──
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+.utmp/
+ExportedObj/
+.consulo/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+*.stackdump
+*.blend1
+*.blend1.meta
+
+# ── Flutter / Mobile Frontend ──
+**/frontend/.dart_tool/
+**/frontend/build/
+**/frontend/.flutter-plugins
+**/frontend/.flutter-plugins-dependencies
+**/frontend/android/local.properties
+**/frontend/android/.gradle/
+**/frontend/android/captures/
+**/frontend/android/gradleBuild/
+**/frontend/ios/Pods/
+**/frontend/ios/.symlinks/
+**/frontend/ios/Flutter/Generated.xcconfig
+**/frontend/ios/Flutter/flutter_export_environment.sh
+**/frontend/ios/ServiceDefinitions.json
+**/frontend/macos/Flutter/ephemeral/
+**/frontend/windows/flutter/ephemeral/
+**/frontend/linux/flutter/ephemeral/
+
+# ── Laravel Backend ──
+**/backend/vendor/
+**/backend/node_modules/
+**/backend/npm-debug.log
+**/backend/yarn-error.log
+**/backend/.env
+**/backend/.env.backup
+**/backend/.env.production
+**/backend/.phpunit.result.cache
+**/backend/public/hot
+**/backend/public/storage
+**/backend/storage/*.key
+!**/backend/.env.example
+
+# ── Python / AI Service ──
+**/__pycache__/
+**/*.py[cod]
+*$py.class
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.venv/
+**/venv/
+**/env/
+**/ai-service/.env
+**/ai-service/.env.*
+!**/ai-service/.env.example
+
+# Large AI model weights & upload caches (>100MB)
+ai-service/models/*.pt
+ai-service/models/*.onnx
+ai-service/models/*.bin
+ai-service/models/*.safetensors
+ai-service/uploads/*
+!ai-service/uploads/.gitkeep
